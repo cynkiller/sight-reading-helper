@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Piano sight-reading training app for Android tablets",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "dev": "vite --port 5173",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "type": "module",
