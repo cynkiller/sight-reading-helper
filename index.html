@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="screen-orientation" content="landscape" />
+    <title>Sight-Reading Helper</title>
+    <style>
+      /* Lock landscape on mobile/tablet */
+      @media (orientation: portrait) {
+        body::before {
+          content: "Please rotate your device to landscape mode";
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: fixed;
+          inset: 0;
+          background: #0f172a;
+          color: #f8fafc;
+          font-size: 20px;
+          font-family: sans-serif;
+          text-align: center;
+          padding: 2rem;
+          z-index: 9999;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-slate-50">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

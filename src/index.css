@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #0f172a;
+  color: #f8fafc;
+  overflow: hidden;
+  height: 100dvh;
+  width: 100dvw;
+}
+
+#root {
+  height: 100dvh;
+  width: 100dvw;
+  overflow: hidden;
+}
+
+/* Note fading transitions */
+.note-element {
+  transition: opacity 0.3s ease-out, fill 0.2s ease;
+}
+
+/* Cursor line animation */
+.playback-cursor {
+  transition: transform 0.05s linear;
+}
