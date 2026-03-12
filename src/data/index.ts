@@ -21,8 +21,42 @@ export const ALL_PIECES: Piece[] = [
   gymnopedie,
 ]
 
+// Uploaded pieces stored in memory (and localStorage for persistence)
+const UPLOAD_STORAGE_KEY = 'srh_uploaded_pieces'
+let uploadedPieces: Piece[] = []
+
+function loadUploadedPieces(): Piece[] {
+  try {
+    const raw = localStorage.getItem(UPLOAD_STORAGE_KEY)
+    if (raw) return JSON.parse(raw) as Piece[]
+  } catch { /* ignore */ }
+  return []
+}
+
+function saveUploadedPieces(pieces: Piece[]) {
+  try { localStorage.setItem(UPLOAD_STORAGE_KEY, JSON.stringify(pieces)) } catch { /* ignore */ }
+}
+
+// Initialize uploaded pieces from localStorage
+uploadedPieces = loadUploadedPieces()
+
+export function addUploadedPiece(piece: Piece): void {
+  uploadedPieces = [piece, ...uploadedPieces.filter(p => p.id !== piece.id)]
+  saveUploadedPieces(uploadedPieces)
+}
+
+export function getUploadedPieces(): Piece[] {
+  return uploadedPieces
+}
+
+export function removeUploadedPiece(id: string): void {
+  uploadedPieces = uploadedPieces.filter(p => p.id !== id)
+  saveUploadedPieces(uploadedPieces)
+}
+
 export function getPieceById(id: string): Piece | undefined {
   return ALL_PIECES.find(p => p.id === id)
+    ?? uploadedPieces.find(p => p.id === id)
 }
 
 export function getPiecesByDifficulty(difficulty: Piece['difficulty']): Piece[] {

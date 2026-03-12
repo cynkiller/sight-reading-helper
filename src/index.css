@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Bravura music notation font (SMuFL) extracted from VexFlow */
+@font-face {
+  font-family: 'Bravura';
+  src: url('/fonts/bravura.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -29,4 +38,9 @@ body {
 /* Cursor line animation */
 .playback-cursor {
   transition: transform 0.05s linear;
+}
+
+/* Prevent pinch zoom during practice (Android tablet) */
+svg[aria-label] {
+  touch-action: pan-x;
 }

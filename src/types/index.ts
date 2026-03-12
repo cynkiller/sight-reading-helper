@@ -41,6 +41,8 @@ export interface PlaybackState {
   tempo: number
 }
 
+export type PracticeMode = 'sightReading' | 'review'
+
 export interface AppSettings {
   lookAhead: LookAheadConfig
   handMode: HandMode
@@ -49,6 +51,7 @@ export interface AppSettings {
   theme: 'dark' | 'light'
   metronomeEnabled: boolean
   showHintBar: boolean
+  practiceMode: PracticeMode  // sight-reading: beats only, review: notes playback
 }
 
 export interface PracticeSession {

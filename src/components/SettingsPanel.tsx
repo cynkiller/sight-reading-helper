@@ -1,4 +1,4 @@
-import type { AppSettings, HandMode } from '../types'
+import type { AppSettings, HandMode, PracticeMode } from '../types'
 
 interface Props {
   settings: AppSettings
@@ -128,7 +128,7 @@ export function SettingsPanel({ settings, pieceDefaultTempo, onUpdate, onClose }
 
           {/* Hand Mode */}
           <section>
-            <h3 className="text-slate-400 text-xs uppercase tracking-widest mb-3">Practice Mode</h3>
+            <h3 className="text-slate-400 text-xs uppercase tracking-widest mb-3">Hand Mode</h3>
             <div className="flex flex-col gap-2">
               {HAND_OPTIONS.map(opt => (
                 <button key={opt.value}
@@ -138,6 +138,27 @@ export function SettingsPanel({ settings, pieceDefaultTempo, onUpdate, onClose }
                       ? 'bg-blue-600 text-white'
                       : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>
                   {opt.label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Practice Mode */}
+          <section>
+            <h3 className="text-slate-400 text-xs uppercase tracking-widest mb-3">Practice Mode</h3>
+            <div className="flex flex-col gap-2">
+              {([
+                { value: 'sightReading' as PracticeMode, label: 'Sight Reading', desc: 'Metronome beats only — practice reading ahead' },
+                { value: 'review' as PracticeMode, label: 'Review', desc: 'Notes play back — verify your playing' },
+              ]).map(opt => (
+                <button key={opt.value}
+                  onClick={() => onUpdate({ practiceMode: opt.value })}
+                  className={`px-3 py-2 rounded-lg text-sm text-left transition-colors
+                    ${settings.practiceMode === opt.value
+                      ? (opt.value === 'sightReading' ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white')
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>
+                  <div className="font-medium">{opt.label}</div>
+                  <div className="text-xs opacity-70 mt-0.5">{opt.desc}</div>
                 </button>
               ))}
             </div>

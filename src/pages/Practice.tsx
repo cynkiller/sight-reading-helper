@@ -8,6 +8,7 @@ import { useAudioSampler } from '../hooks/useAudioSampler'
 import { useSettings } from '../hooks/useSettings'
 import { useProgress } from '../hooks/useProgress'
 import { getPieceById } from '../data'
+import type { PracticeMode } from '../types'
 
 export function Practice() {
   const { pieceId } = useParams<{ pieceId: string }>()
@@ -25,9 +26,13 @@ export function Practice() {
   // Preload on mount
   useEffect(() => { preloadEssentials() }, [preloadEssentials])
 
+  // In sight-reading mode: no note audio, just metronome
+  // In review mode: note audio, no metronome
   const handleNotePlay = useCallback((pitches: string[], durationMs: number) => {
-    playNotes(pitches, durationMs)
-  }, [playNotes])
+    if (settings.practiceMode === 'review') {
+      playNotes(pitches, durationMs)
+    }
+  }, [playNotes, settings.practiceMode])
 
   const handleComplete = useCallback(() => {
     if (!piece) return
@@ -52,17 +57,23 @@ export function Practice() {
     onComplete: handleComplete,
   })
 
-  // Metronome
+  // Metronome: only in sight-reading mode (or if explicitly enabled in review)
   const bpb = piece?.timeSignature.numerator ?? 4
   const prevBeatRef = useRef(-1)
   useEffect(() => {
-    if (!isPlaying || !settings.metronomeEnabled) return
+    if (!isPlaying) return
+    // In sight-reading mode: always play metronome
+    // In review mode: only play if metronomeEnabled
+    const shouldPlayMetronome = settings.practiceMode === 'sightReading'
+      || settings.metronomeEnabled
+    if (!shouldPlayMetronome) return
+
     const beatInBar = Math.floor(currentBeat % bpb)
     if (beatInBar !== prevBeatRef.current) {
       prevBeatRef.current = beatInBar
       playMetronomeClick(beatInBar === 0)
     }
-  }, [currentBeat, isPlaying, settings.metronomeEnabled, bpb, playMetronomeClick])
+  }, [currentBeat, isPlaying, settings.practiceMode, settings.metronomeEnabled, bpb, playMetronomeClick])
 
   if (!piece) {
     return (
@@ -76,10 +87,15 @@ export function Practice() {
     )
   }
 
-  const lineSpacing = settings.displaySize === 'large' ? 18 : 14
+  // Bigger notes: 20px normal, 26px large
+  const lineSpacing = settings.displaySize === 'large' ? 26 : 20
   const progress = totalBeats > 0 ? currentBeat / totalBeats : 0
 
-  const HAND_LABELS: Record<string, string> = { both: '🎹 Both', RH: '▷ RH', LH: '▷ LH' }
+  const HAND_LABELS: Record<string, string> = { both: 'Both', RH: 'RH', LH: 'LH' }
+  const MODE_CONFIG: Record<PracticeMode, { label: string; desc: string; color: string }> = {
+    sightReading: { label: 'Sight Read', desc: 'Beats only - practice reading', color: 'bg-blue-600' },
+    review:       { label: 'Review',     desc: 'Notes play back - verify',      color: 'bg-emerald-600' },
+  }
 
   return (
     <div className="h-full flex flex-col bg-slate-950 overflow-hidden">
@@ -92,15 +108,29 @@ export function Practice() {
           <p className="text-slate-500 text-xs">{piece.composer} · Lv.{piece.level} · ♩={effectiveTempo}</p>
         </div>
 
-        {/* Hand mode toggle */}
+        {/* Practice mode toggle */}
         <div className="flex gap-1">
+          {(['sightReading', 'review'] as PracticeMode[]).map(mode => (
+            <button key={mode}
+              onClick={() => updateSettings({ practiceMode: mode })}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
+                ${settings.practiceMode === mode
+                  ? `${MODE_CONFIG[mode].color} text-white`
+                  : 'text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700'}`}>
+              {MODE_CONFIG[mode].label}
+            </button>
+          ))}
+        </div>
+
+        {/* Hand mode toggle */}
+        <div className="flex gap-1 border-l border-slate-700 pl-2">
           {(['both', 'RH', 'LH'] as const).map(mode => (
             <button key={mode}
               onClick={() => updateSettings({ handMode: mode })}
-              className={`px-2 py-1 rounded text-xs font-medium transition-colors
+              className={`px-2 py-1.5 rounded text-xs font-medium transition-colors
                 ${settings.handMode === mode
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700'}`}>
+                  ? 'bg-slate-600 text-white'
+                  : 'text-slate-500 hover:text-white hover:bg-slate-700'}`}>
               {HAND_LABELS[mode]}
             </button>
           ))}
@@ -117,7 +147,7 @@ export function Practice() {
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-800/80 z-10">
             <div className="text-center">
-              <div className="text-white text-lg mb-2">🎵 Loading samples...</div>
+              <div className="text-white text-lg mb-2">Loading samples...</div>
               <div className="text-slate-400 text-sm">Preparing piano sounds</div>
             </div>
           </div>
@@ -134,6 +164,16 @@ export function Practice() {
             </div>
           </div>
         )}
+
+        {/* Mode indicator bar */}
+        <div className={`px-4 py-1 text-xs text-center font-medium shrink-0
+          ${settings.practiceMode === 'sightReading'
+            ? 'bg-blue-900/40 text-blue-300 border-b border-blue-800/50'
+            : 'bg-emerald-900/40 text-emerald-300 border-b border-emerald-800/50'}`}>
+          {settings.practiceMode === 'sightReading'
+            ? 'Sight-Reading Mode — metronome beats only, no note audio'
+            : 'Review Mode — notes play back for verification'}
+        </div>
 
         {/* Notation area — fills available space */}
         <div className="flex-1 flex items-center justify-center px-2 overflow-hidden">

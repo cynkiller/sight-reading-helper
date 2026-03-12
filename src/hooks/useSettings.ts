@@ -14,6 +14,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   theme: 'dark',
   metronomeEnabled: false,
   showHintBar: true,
+  practiceMode: 'sightReading',
 }
 
 function loadSettings(): AppSettings {
